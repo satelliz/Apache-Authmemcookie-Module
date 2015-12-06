@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Apache-authmemcookie-module by ZenProjects</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Apache-authmemcookie-module</h1>
+      <h2 class="project-tagline">&quot;Auth MemCookie&quot; is an Apache v2.0 Authentication and authorization modules are based on &quot;cookie&quot; Authentication mechanism</h2>
+      <a href="https://github.com/ZenProjects/Apache-Authmemcookie-Module" class="btn">View on GitHub</a>
+      <a href="https://github.com/ZenProjects/Apache-Authmemcookie-Module/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/ZenProjects/Apache-Authmemcookie-Module/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h3>
+<a id="what-is-auth-memcookie" class="anchor" href="#what-is-auth-memcookie" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is "Auth MemCookie"?</h3>
+
+<p>"Auth MemCookie" is an Apache v2.0 Authentication and authorization modules are based on "cookie" Authentication mechanism.</p>
+
+<p>The module doesn’t make Authentication by it self, but verify if Authentication "the cookie" is valid for each url protected by the module. The module validate also if the "authenticated user" have authorization to access url.</p>
+
+<p>Authentication is made externally by an Authentication html form page and all Authentication information necessary to the module a stored in memcached identified by the cookie value "Authentication session id" by this login page.</p>
+
+<h3>
+<a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span class="octicon octicon-link"></span></a>How it Works</h3>
+
+<h1>
+<a id="phase-1--the-login-form" class="anchor" href="#phase-1--the-login-form" aria-hidden="true"><span class="octicon octicon-link"></span></a>Phase 1 : The login Form</h1>
+
+<p>Authentication is made by a login form page.</p>
+
+<p>This login page must authenticate the user with any authenticate source (ldap, /etc/password, file, database....) accessible to language of the page (php, perl, java... an ldap login page sample in php are in samples directory).</p>
+
+<p>Then this page must set cookie that contains only a key the "Authentication unique id" of the "Authentication session".</p>
+
+<p>The login page must store authorization and user information of the authenticated user in memcached identified by the cookie key "Authentication unique id".</p>
+
+<p>The login page can be developed in any language you want, but must be capable to use memcached (they must have memcache client api for us)</p>
+
+<h1>
+<a id="phase-2--the-apache-v2-module" class="anchor" href="#phase-2--the-apache-v2-module" aria-hidden="true"><span class="octicon octicon-link"></span></a>Phase 2 : The Apache v2 Module</h1>
+
+<p>After the user is logged, the apache 2 module check on each protected page by apache ACL the presence of the "cookie".</p>
+
+<p>If the "cookie" exists, try to get session in <a href="http://memcached.org/">memcached</a> with the "cookie" value if not found return "<strong>HTTP_UNAUTHORIZED</strong>" page. </p>
+
+<p>If session exists in <a href="http://memcached.org/">memcached</a> verify if ACL match user session information if not match return "<strong>HTTP_FORBIDDEN</strong>" page. </p>
+
+<h3>
+<a id="session-format-stored-in-memcached" class="anchor" href="#session-format-stored-in-memcached" aria-hidden="true"><span class="octicon octicon-link"></span></a>Session format stored in memcached</h3>
+
+<p>The session store in <a href="http://memcached.org/">memcached</a> are composed with multiple line in form of "<strong>name</strong>" equal "<strong>value</strong>" ended by "<strong>\r\n</strong>". some are mandatory, other are optional and the rest are information only (all this field are transmitted to the script language protect the module).</p>
+
+<p>Session format:</p>
+
+<pre><code>UserName=&lt;user name&gt;\r\n
+Groups=&lt;group name1&gt;:&lt;group name2&gt;:...\r\n
+RemoteIP=&lt;remote ip&gt;\r\n
+Password=&lt;password&gt;\r\n
+Expiration=&lt;expiration time&gt;\r\n
+Email=&lt;email&gt;\r\n
+Name=&lt;name&gt;\r\n
+GivenName=&lt;given name&gt;\r\n
+</code></pre>
+
+<ul>
+<li>
+<strong>Username</strong>: are mandatory.</li>
+<li>
+<strong>Groups</strong>: are mandatory, are used to check group in apache acl. if no group are know for the user, must be blank (Groups=\r\n)</li>
+<li>
+<strong>RemoteIP</strong>: are mandatory, used by remote ip check function in apache module.</li>
+<li>
+<strong>Password</strong>: are not mandatory, and is not recommended to store in memcached for security reson, but if stored, is sent to the script language protected by the module.</li>
+<li>The other fields are information only, but they are sent to the langage that are behind the module (via environement variable or http header).</li>
+</ul>
+
+<p>The session field size is for the moment limited to 10 fields by default.</p>
+
+<h3>
+<a id="build-dependency" class="anchor" href="#build-dependency" aria-hidden="true"><span class="octicon octicon-link"></span></a>Build dependency</h3>
+
+<p>You must have compiled and installed:</p>
+
+<ul>
+<li>
+<a href="http://libevent.org/">libevent</a> use by memcached.</li>
+<li>
+<a href="http://memcached.org/">memcached</a> the cache daemon it self.</li>
+<li>
+<a href="http://people.freebsd.org/%7Eseanc/libmemcache/">libmemcache</a> the C client API needed to compile the Apache Module.</li>
+</ul>
+
+<h3>
+<a id="compilation" class="anchor" href="#compilation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compilation</h3>
+
+<p>You must modify Makefile:</p>
+
+<ul>
+<li>Set correctly the MY_APXS variable to point to the apache "apxs" scripts.</li>
+<li>Add the memcache library path in MY_LDFLAGS variable if necessary (-L)</li>
+</ul>
+
+<p>How to compile:</p>
+
+<pre><code>#make
+#make install
+</code></pre>
+
+<p>After that the "mod_auth_memcookie.so" is generated in apache "modules" directory.</p>
+
+<h3>
+<a id="how-to-configure-apache-module" class="anchor" href="#how-to-configure-apache-module" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to configure Apache Module</h3>
+
+<h1>
+<a id="module-configuration-option" class="anchor" href="#module-configuration-option" aria-hidden="true"><span class="octicon octicon-link"></span></a>Module configuration option:</h1>
+
+<p>This option can be used in "location" or "directory" apache context.</p>
+
+<ul>
+<li><strong>Auth_memCookie_Memcached_AddrPort</strong></li>
+</ul>
+
+<p>Liste of ip or host adresse(s) and port ':' separed of memcache(s) daemon to be used, coma separed.
+For exemple: 
+    host1:12000,host2:12000</p>
+
+<ul>
+<li><strong>Auth_memCookie_Memcached_SessionObject_ExpireTime</strong></li>
+</ul>
+
+<p>Session object stored in memcached expiry time, in secondes. 
+Used only if "Auth_memCookie_Memcached_SessionObject_ExpiryReset" is set to on.
+Set to 3600 seconds by default.</p>
+
+<ul>
+<li><strong>Auth_memCookie_Memcached_SessionObject_ExpiryReset</strong></li>
+</ul>
+
+<p>Set to 'no' to not reset object expiry time in memcache on each url... set to yes by default</p>
+
+<ul>
+<li><strong>Auth_memCookie_SessionTableSize</strong></li>
+</ul>
+
+<p>Max number of element in session information table. set to 10 by default.</p>
+
+<ul>
+<li><strong>Auth_memCookie_SetSessionHTTPHeader</strong></li>
+</ul>
+
+<p>Set to 'yes' to set session information to http header of the authenticated users, set to no by default.</p>
+
+<ul>
+<li><strong>Auth_memCookie_SetSessionHTTPHeaderEncode</strong></li>
+</ul>
+
+<p>Set to 'yes' to mime64 encode session information to http header, set to no by default.</p>
+
+<ul>
+<li><strong>Auth_memCookie_CookieName</strong></li>
+</ul>
+
+<p>Name of the cookie to used for check authentification, set to "AuthMemCookie" by default.</p>
+
+<ul>
+<li><strong>Auth_memCookie_MatchIP</strong></li>
+</ul>
+
+<p>Set to 'no' to not check IP address set in cookie with the remote browser ip, set to 'yes' by default.</p>
+
+<ul>
+<li><strong>Auth_memCookie_GroupAuthoritative</strong></li>
+</ul>
+
+<p>Set to 'no' to allow access control to be passed along to lower modules, for group acl check. set to 'yes' by default.</p>
+
+<ul>
+<li><strong>Auth_memCookie_Authoritative</strong></li>
+</ul>
+
+<p>Set to 'yes' to allow access control to be passed along to lower modules.Set to 'no' by default.</p>
+
+<ul>
+<li><strong>Auth_memCookie_SilmulateAuthBasic</strong></li>
+</ul>
+
+<p>Set to 'no' to not fix http header and auth_type for simulating auth basic for scripting language like php auth framework work., set to 'yes' by default</p>
+
+<h1>
+<a id="sample-to-configure-apache-v2-module" class="anchor" href="#sample-to-configure-apache-v2-module" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sample to configure Apache v2 Module:</h1>
+
+<p>Configuration sample for using Auth_memcookie apache V2 module:</p>
+
+<pre><code>LoadModule mod_auth_memcookie_module modules/mod_auth_memcookie.so
+
+&lt;IfModule mod_auth_memcookie.c&gt;
+ &lt;Location /&gt;
+ Auth_memCookie_CookieName myauthcookie
+ Auth_memCookie_Memcached_AddrPort 127.0.0.1:11000
+
+ # to redirect unauthorized user to the login page
+ ErrorDocument 401 "/gestionuser/login.php"
+
+ # to specify if the module are autoritative in this directory
+ Auth_memCookie_Authoritative on
+ # must be set without that the refuse authentification
+ AuthType Cookie
+ # must be set (apache mandatory) but not used by the module
+ AuthName "My Login"
+ &lt;/Location&gt;
+
+&lt;/IfModule&gt;
+
+# to protect juste user authentification
+&lt;Location "/myprotectedurl"&gt;
+ require valid-user
+&lt;/Location&gt;
+
+# to protect acces to user in group1
+&lt;Location "/myprotectedurlgroup1"&gt;
+ require group group1
+&lt;/Location&gt;
+</code></pre>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/ZenProjects/Apache-Authmemcookie-Module">Apache-authmemcookie-module</a> is maintained by <a href="https://github.com/ZenProjects">ZenProjects</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
