@@ -20,7 +20,7 @@
 
     <section class="main-content">
       <h1>
-<a id="what-is-auth-memcookie" class="anchor" href="#what-is-auth-memcookie" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is "Auth MemCookie"?</h1>
+<a id="what-is-auth-memcookie" class="anchor" href="#what-is-auth-memcookie" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What is "Auth MemCookie"?</h1>
 
 <p>"Auth MemCookie" is an Apache v2.0 Authentication and authorization modules are based on "cookie" Authentication mechanism.</p>
 
@@ -29,10 +29,10 @@
 <p>Authentication is made externally by an Authentication html form page and all Authentication information necessary to the module a stored in memcached identified by the cookie value "Authentication session id" by this login page.</p>
 
 <h1>
-<a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span class="octicon octicon-link"></span></a>How it Works</h1>
+<a id="how-it-works" class="anchor" href="#how-it-works" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How it Works</h1>
 
 <h2>
-<a id="phase-1--the-login-form" class="anchor" href="#phase-1--the-login-form" aria-hidden="true"><span class="octicon octicon-link"></span></a>Phase 1 : The login Form</h2>
+<a id="phase-1--the-login-form" class="anchor" href="#phase-1--the-login-form" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Phase 1 : The login Form</h2>
 
 <p>Authentication is made by a login form page.</p>
 
@@ -45,7 +45,7 @@
 <p>The login page can be developed in any language you want, but must be capable to use memcached (they must have memcache client api for us)</p>
 
 <h2>
-<a id="phase-2--the-apache-v2-module" class="anchor" href="#phase-2--the-apache-v2-module" aria-hidden="true"><span class="octicon octicon-link"></span></a>Phase 2 : The Apache v2 Module</h2>
+<a id="phase-2--the-apache-v2-module" class="anchor" href="#phase-2--the-apache-v2-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Phase 2 : The Apache v2 Module</h2>
 
 <p>After the user is logged, the apache 2 module check on each protected page by apache ACL the presence of the "cookie".</p>
 
@@ -54,7 +54,7 @@
 <p>If session exists in <a href="http://memcached.org/">memcached</a> verify if ACL match user session information if not match return "<strong>HTTP_FORBIDDEN</strong>" page. </p>
 
 <h1>
-<a id="session-format-stored-in-memcached" class="anchor" href="#session-format-stored-in-memcached" aria-hidden="true"><span class="octicon octicon-link"></span></a>Session format stored in memcached</h1>
+<a id="session-format-stored-in-memcached" class="anchor" href="#session-format-stored-in-memcached" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Session format stored in memcached</h1>
 
 <p>The session store in <a href="http://memcached.org/">memcached</a> are composed with multiple line in form of "<strong>name</strong>" equal "<strong>value</strong>" ended by "<strong>\r\n</strong>". some are mandatory, other are optional and the rest are information only (all this field are transmitted to the script language protect the module).</p>
 
@@ -85,7 +85,7 @@ GivenName=&lt;given name&gt;\r\n
 <p>The session field size is for the moment limited to 10 fields by default.</p>
 
 <h1>
-<a id="build-dependency" class="anchor" href="#build-dependency" aria-hidden="true"><span class="octicon octicon-link"></span></a>Build dependency</h1>
+<a id="build-dependency" class="anchor" href="#build-dependency" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Build dependency</h1>
 
 <p>You must have compiled and installed:</p>
 
@@ -100,28 +100,20 @@ GivenName=&lt;given name&gt;\r\n
 </blockquote>
 
 <h1>
-<a id="compilation" class="anchor" href="#compilation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compilation</h1>
+<a id="compilation" class="anchor" href="#compilation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Compilation</h1>
 
-<p>You must modify Makefile:</p>
-
-<ul>
-<li>Set correctly the MY_APXS variable to point to the apache "apxs" scripts.</li>
-<li>Add the memcache library path in MY_LDFLAGS variable if necessary (-L)</li>
-</ul>
-
-<p>How to compile:</p>
-
-<pre><code>#make
-#make install
+<pre><code># ./configure --with-apxs=/path/to/apache/httpd/bin/apxs --with-libmemcache=/path/to/libmemcache/
+# make
+# make install
 </code></pre>
 
 <p>After that the "mod_auth_memcookie.so" is generated in apache "modules" directory.</p>
 
 <h1>
-<a id="how-to-configure-apache-module" class="anchor" href="#how-to-configure-apache-module" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to configure Apache Module</h1>
+<a id="how-to-configure-apache-module" class="anchor" href="#how-to-configure-apache-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to configure Apache Module</h1>
 
 <h2>
-<a id="module-configuration-option" class="anchor" href="#module-configuration-option" aria-hidden="true"><span class="octicon octicon-link"></span></a>Module configuration option:</h2>
+<a id="module-configuration-option" class="anchor" href="#module-configuration-option" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Module configuration option:</h2>
 
 <p>This option can be used in "location" or "directory" apache context.</p>
 
@@ -196,7 +188,7 @@ Set to 3600 seconds by default.</p>
 <p>Set to 'no' to not fix http header and auth_type for simulating auth basic for scripting language like php auth framework work., set to 'yes' by default</p>
 
 <h2>
-<a id="sample-to-configure-apache-v2-module" class="anchor" href="#sample-to-configure-apache-v2-module" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sample to configure Apache v2 Module:</h2>
+<a id="sample-to-configure-apache-v2-module" class="anchor" href="#sample-to-configure-apache-v2-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sample to configure Apache v2 Module:</h2>
 
 <p>Configuration sample for using Auth_memcookie apache V2 module:</p>
 
