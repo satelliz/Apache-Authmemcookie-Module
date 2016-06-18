@@ -92,17 +92,13 @@ GivenName=&lt;given name&gt;\r\n
 <ul>
 <li><p><a href="http://libevent.org/">libevent</a> use by <a href="http://memcached.org/">memcached</a>.</p></li>
 <li><p><a href="http://memcached.org/">memcached</a> the cache daemon it self.</p></li>
-<li><p><a href="https://github.com/richp10/libmemcache-1.4.0.rc2-patched">libmemcache</a> the C client API needed to compile the Apache Module.</p></li>
+<li><p><a href="http://libmemcached.org/">libmemcached</a> the C client API needed to compile the Apache Module.</p></li>
 </ul>
-
-<blockquote>
-<p><strong>Attention:</strong> Don't mix up <code>libmemcache</code> and <code>libmemcached</code>!</p>
-</blockquote>
 
 <h1>
 <a id="compilation" class="anchor" href="#compilation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Compilation</h1>
 
-<pre><code># ./configure --with-apxs=/path/to/apache/httpd/bin/apxs --with-libmemcache=/path/to/libmemcache/
+<pre><code># ./configure --with-apxs=/path/to/apache/httpd/bin/apxs --with-libmemcached=/path/to/libmemcached/
 # make
 # make install
 </code></pre>
@@ -118,12 +114,16 @@ GivenName=&lt;given name&gt;\r\n
 <p>This option can be used in "location" or "directory" apache context.</p>
 
 <ul>
-<li><strong>Auth_memCookie_Memcached_AddrPort</strong></li>
+<li><strong>Auth_memCookie_Memcached_Configuration</strong></li>
 </ul>
 
-<p>Liste of ip or host adresse(s) and port ':' separed of memcache(s) daemon to be used, coma separed.
-For exemple: 
-    host1:12000,host2:12000</p>
+<p>This configuration directive permit to configure libmemcached initialisation.
+<a href="http://docs.libmemcached.org/libmemcached_configuration.html">http://docs.libmemcached.org/libmemcached_configuration.html</a></p>
+
+<p>With that directive you can specify a liste of ip or host adresse(s) and port ':' separed of memcache(s) daemon to be used.</p>
+
+<p>For exemple: 
+    Auth_memCookie_Memcached_Configuration "--SERVER=host10.example.com --SERVER=host11.example.com --SERVER=host10.example.com"</p>
 
 <ul>
 <li><strong>Auth_memCookie_Memcached_SessionObject_ExpireTime</strong></li>
@@ -197,7 +197,7 @@ Set to 3600 seconds by default.</p>
 &lt;IfModule mod_auth_memcookie.c&gt;
  &lt;Location /&gt;
  Auth_memCookie_CookieName myauthcookie
- Auth_memCookie_Memcached_AddrPort 127.0.0.1:11000
+ Auth_memCookie_Memcached_Configuration --SERVER=127.0.0.1:11000
 
  # to redirect unauthorized user to the login page
  ErrorDocument 401 "/gestionuser/login.php"
