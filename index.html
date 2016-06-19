@@ -201,11 +201,36 @@ Each session field name are prefixed by Auth_memCookie_SetSessionHTTPHeaderPrefi
 
 <p>Set to 'off' to not fix http header and auth_type for simulating auth basic for scripting language like php auth framework work, is set to 'on' by default.</p>
 
+<p>with this option this $_SERVER variable are normaly set on php: 
+  AUTH_TYPE = "basic"
+  PHP_AUTH_USER = "user"
+  PHP_AUTH_PW = "password"</p>
+
 <ul>
 <li><strong>Auth_memCookie_DisableNoStore</strong></li>
 </ul>
 
 <p>Set to 'on' to stop the sending of a Cache-Control no-store header with the login screen. This allows the browser to cache the credentials, but at the risk of it being possible for the login form to be resubmitted and revealed to the backend server through XSS. Use at own risk.</p>
+
+<h1>
+<a id="on-backend-application" class="anchor" href="#on-backend-application" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>on backend application</h1>
+
+<p>The application recieve this information: </p>
+
+<ul>
+<li>REMOTE_USER are set to the user logged name</li>
+<li>AUTHMEMCOOKIE_PREFIX are set to Auth_memCookie_SetSessionHTTPHeaderPrefix</li>
+<li><p>AUTHMEMCOOKIE_AUTH are set to "yes" when protected, "no" when in public zone.</p></li>
+<li><p>and all session field (prefixed by Auth_memCookie_SetSessionHTTPHeaderPrefix/AUTHMEMCOOKIE_PREFIX) if Auth_memCookie_SetSessionHTTPHeader is on.</p></li>
+</ul>
+
+<p>and if Auth_memCookie_SilmulateAuthBasic is set, they recieve also this $_SERVER variable : </p>
+
+<ul>
+<li>AUTH_TYPE = "basic"</li>
+<li>PHP_AUTH_USER = "user"</li>
+<li>PHP_AUTH_PW = "password"</li>
+</ul>
 
 <h1>
 <a id="apache-2324-authnauthz-model" class="anchor" href="#apache-2324-authnauthz-model" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Apache 2.3/2.4 <a href="https://httpd.apache.org/docs/2.4/howto/auth.html">authn/authz model</a>
