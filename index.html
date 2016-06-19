@@ -131,21 +131,23 @@ The syntax of this directive value are defined her: <a href="http://docs.libmemc
 <li><strong>Auth_memCookie_Memcached_SessionObject_ExpireTime</strong></li>
 </ul>
 
-<p>Session object stored in memcached expiry time, in secondes. 
-Used only if "Auth_memCookie_Memcached_SessionObject_ExpiryReset" is set to 'on'.
-Set to 3600 seconds by default.</p>
+<p>Session object stored in memcached expiry time, in secondes. </p>
+
+<p>Used only if "Auth_memCookie_Memcached_SessionObject_ExpiryReset" is set to 'on'.</p>
+
+<p>Set to 3600 seconds by default.</p>
 
 <ul>
 <li><strong>Auth_memCookie_Memcached_SessionObject_ExpiryReset</strong></li>
 </ul>
 
-<p>Set to 'off' to not reset object expiry time in memcache on each url... is set to 'on' by default.</p>
+<p>Set to 'off' to not reset object expiry time in memcache on each url, is set to 'on' by default.</p>
 
 <ul>
 <li><strong>Auth_memCookie_SessionTableSize</strong></li>
 </ul>
 
-<p>Max number of element in session information table. is set to 10 by default.</p>
+<p>Max number of element in session information table, is set to 10 by default.</p>
 
 <ul>
 <li><strong>Auth_memCookie_SetSessionHTTPHeader</strong></li>
@@ -160,34 +162,48 @@ Set to 3600 seconds by default.</p>
 <p>Set to 'on' to mime64 encode session information to http header, is set to 'off' by default.</p>
 
 <ul>
+<li>
+<strong>Auth_memCookie_SetSessionHTTPHeaderPrefix</strong> </li>
+</ul>
+
+<p>Set HTTP header prefix, is set to 'MCAC_' by default.</p>
+
+<ul>
 <li><strong>Auth_memCookie_CookieName</strong></li>
 </ul>
 
 <p>Name of the cookie to used for check authentification, is set to "AuthMemCookie" by default.</p>
 
 <ul>
-<li><strong>Auth_memCookie_MatchIP</strong></li>
+<li><strong>Auth_memCookie_MatchIP_Mode</strong></li>
 </ul>
 
-<p>Set to 'off' to not check IP address set in cookie with the remote browser ip, is set to 'on' by default.</p>
+<p>To check cookie ip adresse, Set to '1' to use 'X-Forwarded-For' http header, to '2' to use 'Via' http header, and to '3' to use apache remote_ip, is set to '0' by default to desactivate the ip check.</p>
 
 <ul>
-<li><strong>Auth_memCookie_GroupAuthoritative</strong></li>
+<li>
+<strong>Auth_memCookie_GroupAuthoritative</strong> (only on apache &lt;2.4)</li>
 </ul>
 
-<p>Set to 'off' to allow access control to be passed along to lower modules, for group acl check. is set to 'on' by default.</p>
+<p>Set to 'off' to allow access control to be passed along to lower modules, for group acl check, is set to 'on' by default.</p>
 
 <ul>
 <li><strong>Auth_memCookie_Authoritative</strong></li>
 </ul>
 
-<p>Set to 'on' to allow access control to be passed along to lower modules.Set to 'off' by default.</p>
+<p>Set to 'off' to allow access control to be passed along to lower modules, is set to 'on' by default.</p>
 
 <ul>
 <li><strong>Auth_memCookie_SilmulateAuthBasic</strong></li>
 </ul>
 
-<p>Set to 'off' to not fix http header and auth_type for simulating auth basic for scripting language like php auth framework work, set to 'on' by default</p>
+<p>Set to 'off' to not fix http header and auth_type for simulating auth basic for scripting language like php auth framework work, is set to 'on' by default.</p>
+
+<ul>
+<li><strong>Auth_memCookie_DisableNoStore</strong></li>
+</ul>
+
+<p>Set to 'on' to stop the sending of a Cache-Control no-store header with the login screen. This allows the browser to cache the credentials, but at the risk of it being possible for the login form to be resubmitted and revealed to the backend server through XSS. Use at own risk.</p>
 
 <h2>
 <a id="sample-to-configure-apache-v2-module" class="anchor" href="#sample-to-configure-apache-v2-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sample to configure Apache v2 Module:</h2>
