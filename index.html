@@ -132,62 +132,62 @@ The syntax of this directive value are defined her: <a href="http://docs.libmemc
 </ul>
 
 <p>Session object stored in memcached expiry time, in secondes. 
-Used only if "Auth_memCookie_Memcached_SessionObject_ExpiryReset" is set to on.
+Used only if "Auth_memCookie_Memcached_SessionObject_ExpiryReset" is set to 'on'.
 Set to 3600 seconds by default.</p>
 
 <ul>
 <li><strong>Auth_memCookie_Memcached_SessionObject_ExpiryReset</strong></li>
 </ul>
 
-<p>Set to 'no' to not reset object expiry time in memcache on each url... set to yes by default</p>
+<p>Set to 'off' to not reset object expiry time in memcache on each url... is set to 'on' by default.</p>
 
 <ul>
 <li><strong>Auth_memCookie_SessionTableSize</strong></li>
 </ul>
 
-<p>Max number of element in session information table. set to 10 by default.</p>
+<p>Max number of element in session information table. is set to 10 by default.</p>
 
 <ul>
 <li><strong>Auth_memCookie_SetSessionHTTPHeader</strong></li>
 </ul>
 
-<p>Set to 'yes' to set session information to http header of the authenticated users, set to no by default.</p>
+<p>Set to 'on' to set session information to http header of the authenticated users, is set to 'off' by default.</p>
 
 <ul>
 <li><strong>Auth_memCookie_SetSessionHTTPHeaderEncode</strong></li>
 </ul>
 
-<p>Set to 'yes' to mime64 encode session information to http header, set to no by default.</p>
+<p>Set to 'on' to mime64 encode session information to http header, is set to 'off' by default.</p>
 
 <ul>
 <li><strong>Auth_memCookie_CookieName</strong></li>
 </ul>
 
-<p>Name of the cookie to used for check authentification, set to "AuthMemCookie" by default.</p>
+<p>Name of the cookie to used for check authentification, is set to "AuthMemCookie" by default.</p>
 
 <ul>
 <li><strong>Auth_memCookie_MatchIP</strong></li>
 </ul>
 
-<p>Set to 'no' to not check IP address set in cookie with the remote browser ip, set to 'yes' by default.</p>
+<p>Set to 'off' to not check IP address set in cookie with the remote browser ip, is set to 'on' by default.</p>
 
 <ul>
 <li><strong>Auth_memCookie_GroupAuthoritative</strong></li>
 </ul>
 
-<p>Set to 'no' to allow access control to be passed along to lower modules, for group acl check. set to 'yes' by default.</p>
+<p>Set to 'off' to allow access control to be passed along to lower modules, for group acl check. is set to 'on' by default.</p>
 
 <ul>
 <li><strong>Auth_memCookie_Authoritative</strong></li>
 </ul>
 
-<p>Set to 'yes' to allow access control to be passed along to lower modules.Set to 'no' by default.</p>
+<p>Set to 'on' to allow access control to be passed along to lower modules.Set to 'off' by default.</p>
 
 <ul>
 <li><strong>Auth_memCookie_SilmulateAuthBasic</strong></li>
 </ul>
 
-<p>Set to 'no' to not fix http header and auth_type for simulating auth basic for scripting language like php auth framework work., set to 'yes' by default</p>
+<p>Set to 'off' to not fix http header and auth_type for simulating auth basic for scripting language like php auth framework work, set to 'on' by default</p>
 
 <h2>
 <a id="sample-to-configure-apache-v2-module" class="anchor" href="#sample-to-configure-apache-v2-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sample to configure Apache v2 Module:</h2>
