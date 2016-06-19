@@ -220,11 +220,12 @@ Each session field name are prefixed by Auth_memCookie_SetSessionHTTPHeaderPrefi
 <ul>
 <li>REMOTE_USER are set to the user logged name</li>
 <li>AUTHMEMCOOKIE_PREFIX are set to Auth_memCookie_SetSessionHTTPHeaderPrefix</li>
-<li><p>AUTHMEMCOOKIE_AUTH are set to "yes" when protected, "no" when in public zone.</p></li>
-<li><p>and all session field (prefixed by Auth_memCookie_SetSessionHTTPHeaderPrefix/AUTHMEMCOOKIE_PREFIX) if Auth_memCookie_SetSessionHTTPHeader is on.</p></li>
+<li>AUTHMEMCOOKIE_AUTH are set to "yes" when protected, "no" when in public zone.</li>
 </ul>
 
-<p>and if Auth_memCookie_SilmulateAuthBasic is set, they recieve also this $_SERVER variable : </p>
+<p>And all session field (prefixed by Auth_memCookie_SetSessionHTTPHeaderPrefix/AUTHMEMCOOKIE_PREFIX) if Auth_memCookie_SetSessionHTTPHeader is on.</p>
+
+<p>And if Auth_memCookie_SilmulateAuthBasic is set, they recieve also this $_SERVER variable : </p>
 
 <ul>
 <li>AUTH_TYPE = "basic"</li>
