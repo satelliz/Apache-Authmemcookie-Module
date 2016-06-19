@@ -12,7 +12,7 @@
   <body>
     <section class="page-header">
       <h1 class="project-name">Apache-authmemcookie-module</h1>
-      <h2 class="project-tagline">&quot;Auth MemCookie&quot; is an Apache v2.0 Authentication and authorization modules are based on &quot;cookie&quot; Authentication mechanism</h2>
+      <h2 class="project-tagline">&quot;Auth MemCookie&quot; is an Apache v2 Authentication and authorization modules are based on &quot;cookie&quot; Authentication mechanism</h2>
       <a href="https://github.com/ZenProjects/Apache-Authmemcookie-Module" class="btn">View on GitHub</a>
       <a href="https://github.com/ZenProjects/Apache-Authmemcookie-Module/zipball/master" class="btn">Download .zip</a>
       <a href="https://github.com/ZenProjects/Apache-Authmemcookie-Module/tarball/master" class="btn">Download .tar.gz</a>
@@ -22,7 +22,7 @@
       <h1>
 <a id="what-is-auth-memcookie" class="anchor" href="#what-is-auth-memcookie" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What is "Auth MemCookie"?</h1>
 
-<p>"Auth MemCookie" is an Apache v2.0 Authentication and authorization modules are based on "cookie" Authentication mechanism.</p>
+<p>"Auth MemCookie" is an Apache v2 Authentication and authorization modules are based on "cookie" Authentication mechanism.</p>
 
 <p>The module doesn’t make Authentication by it self, but verify if Authentication "the cookie" is valid for each url protected by the module. The module validate also if the "authenticated user" have authorization to access url.</p>
 
@@ -214,7 +214,7 @@ Each session field name are prefixed by Auth_memCookie_SetSessionHTTPHeaderPrefi
 <p>The module add some <a href="https://httpd.apache.org/docs/2.4/mod/mod_authz_core.html#require">"Require"/"authz"</a> provider:</p>
 
 <ul>
-<li><strong>mcac-group</strong></li>
+<li><strong>Require mcac-group</strong></li>
 </ul>
 
 <p>To limit access to groups specified in session ("groups" session field) by the login script.
@@ -228,7 +228,7 @@ Use the same syntax than <a href="https://httpd.apache.org/docs/2.4/mod/mod_auth
 <p>If one match on group of the "groups" session field they are granted.</p>
 
 <ul>
-<li><strong>mcac-public</strong></li>
+<li><strong>Require mcac-public</strong></li>
 </ul>
 
 <p>They make possible to specify public access zone.
@@ -239,10 +239,79 @@ In that zone authenticated or not are granted but authenticated can send session
    &lt;/Location&gt;
 </code></pre>
 
-<h2>
-<a id="sample-to-configure-apache-v2-module" class="anchor" href="#sample-to-configure-apache-v2-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sample to configure Apache v2 Module:</h2>
+<ul>
+<li>
+<strong><a href="https://httpd.apache.org/docs/2.4/mod/mod_authz_user.html#requiredirectives">Require valide-user</a></strong> and <strong><a href="https://httpd.apache.org/docs/2.4/mod/mod_authz_user.html#requiredirectives">Require user</a></strong>
+</li>
+</ul>
 
-<p>Configuration sample for using Auth_memcookie apache V2 module:</p>
+<p>All the two a provided by <a href="https://httpd.apache.org/docs/2.4/mod/mod_authz_user.html">mod_authz_user</a> core apache module.</p>
+
+<h2>
+<a id="sample-to-configure-apache-v24-module" class="anchor" href="#sample-to-configure-apache-v24-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sample to configure Apache v2.4 Module:</h2>
+
+<p>Configuration sample for using Auth_memcookie apache V2.4 module:</p>
+
+<pre><code>LoadModule mod_auth_memcookie_module modules/mod_auth_memcookie.so
+
+&lt;IfModule mod_auth_memcookie.c&gt;
+ &lt;Location /&gt;
+ Auth_memCookie_CookieName myauthcookie
+ Auth_memCookie_Memcached_Configuration --SERVER=127.0.0.1:11000
+
+ # to redirect unauthorized user to the login page
+ ErrorDocument 401 "/gestionuser/login.php"
+
+ # to specify if the module are autoritative in this directory
+ Auth_memCookie_Authoritative on
+ # must be set without that the refuse authentification
+ AuthType Cookie
+ # must be set (apache mandatory) but not used by the module
+ AuthName "My Login"
+ require mcac-public
+ &lt;/Location&gt;
+
+&lt;/IfModule&gt;
+
+# to protect juste user authentification
+&lt;Location "/myprotectedurl"&gt;
+ require valid-user
+&lt;/Location&gt;
+
+# to protect acces to user in group1
+&lt;Location "/myprotectedurlgroup1"&gt;
+ require mcac-group group1
+&lt;/Location&gt;
+</code></pre>
+
+<h1>
+<a id="apache-2022-authnauthz-model" class="anchor" href="#apache-2022-authnauthz-model" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Apache 2.0/2.2 <a href="http://httpd.apache.org/docs/2.2/howto/auth.html">authn/authz model</a>
+</h1>
+
+<ul>
+<li><strong>Require group groupname [groupname]...</strong></li>
+</ul>
+
+<p>Only users with the specified groups can access the resource.</p>
+
+<ul>
+<li><strong>Require valid-user</strong></li>
+</ul>
+
+<p>Any valid user can access the resource.</p>
+
+<ul>
+<li><strong>Require user user_id [user_id]...</strong></li>
+</ul>
+
+<p>Only specified users can access the resource.</p>
+
+<p>all this directive are from <a href="http://httpd.apache.org/docs/2.2/mod/core.html#require">mod_auth_basic</a> module.</p>
+
+<h2>
+<a id="sample-to-configure-apache-v20-module" class="anchor" href="#sample-to-configure-apache-v20-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Sample to configure Apache v2.0 Module:</h2>
+
+<p>Configuration sample for using Auth_memcookie apache V2.0 module:</p>
 
 <pre><code>LoadModule mod_auth_memcookie_module modules/mod_auth_memcookie.so
 
