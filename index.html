@@ -218,9 +218,10 @@ Each session field name are prefixed by Auth_memCookie_SetSessionHTTPHeaderPrefi
 </ul>
 
 <p>To limit access to groups specified in session ("groups" session field) by the login script.
-Use the same syntax than <a href="https://httpd.apache.org/docs/2.4/mod/mod_authz_groupfile.html#requiredirectives">"Require group"</a>.</p>
+Use the same syntax than <a href="https://httpd.apache.org/docs/2.4/mod/mod_authz_groupfile.html#requiredirectives">"Require group"</a>.
+But "Require group" on apache 2.3/2.4 work only with <a href="https://httpd.apache.org/docs/2.4/mod/mod_authz_groupfile.html">mod_authz_groupfile</a>.</p>
 
-<p>They support multiple groups like that:</p>
+<p>They also support multiple groups like that:</p>
 
 <pre><code> Require mcac-group group1 group2 group3
 </code></pre>
