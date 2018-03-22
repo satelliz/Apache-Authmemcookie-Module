@@ -2,6 +2,16 @@
 [![CircleCI](https://circleci.com/gh/ZenProjects/Apache-Authmemcookie-Module.svg?style=shield)](https://circleci.com/gh/ZenProjects/Apache-Authmemcookie-Module)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 
+# Redis branch
+
+Hello-hello-hello!
+
+In this branch memcached replaced by redis as an authentication backend.
+
+Amongst known issues are lack of support for expiration reset, host/port of redis server is hardcoded directly in code, and also build process still requires memcached libraries although not actually used.
+
+But normally it works considering to be a proof-of-concept implementation.
+
 # What is "Auth MemCookie"?
 
 `Auth MemCookie` is an Apache v2 Authentication and authorization modules are based on `cookie` Authentication mechanism.
@@ -44,20 +54,32 @@ If any of the steps 1-4 fails, then Auth MemCookie will return a **`HTTP_UNAUTHO
 
 When a user is successfully authenticated, Auth MemCookie will store all the fields from the **`session data`** in environment variables accessible to the web page. Every field of the **`session data`** will be send http header **`MCAC_<field-name>`** to the value of the field. 
 
-# *"Session data"* format stored in memcached
+# *"Session data"* format stored in redis
 
-The **`session data`** stored in [memcached](http://memcached.org/) are composed with multiple line in form of **`name`** equal **`value`** ended by **`\r\n`**. some are mandatory, other are optional and the rest are information only (all this field are transmitted to the script language protect the module).
+$ redis-cli hset testme Username mykola
+(integer) 0
+
+The **`session data`** stored in [redis](https://redislabs.com) are composed with multiple subkeys in HASH. some are mandatory, other are optional and the rest are information only (all this field are transmitted to the script language protect the module).
 
 **`Session data`** format:
 
-    UserName=<user name>\r\n
-    Groups=<group name1>:<group name2>:...\r\n
-    RemoteIP=<remote ip>\r\n
-    Password=<password>\r\n
-    Expiration=<expiration time>\r\n
-    Email=<email>\r\n
-    Name=<name>\r\n
-    GivenName=<given name>\r\n
+$ redis-cli --raw hgetall testauthcookie 
+Username
+<username>
+Groups
+<group name1>:<group name2>:...
+RemoteIP
+<remote ip>
+Password
+<password>
+Expiration
+<expiration time>
+Email
+<email>
+Name
+<name>
+GivenName
+<given name>
 
 - **Username**: are mandatory.
 - **Groups**: are mandatory, are used to check group in apache acl. if no group are know for the user, must be blank (Groups=\r\n)
@@ -70,6 +92,8 @@ The session field size is for the moment limited to 10 fields by default.
 # Build dependency
 
 You must have compiled and installed:
+
+- [hiredis](https://github.com/redis/hiredis) use by [redis](https://redislabs.com/).
 
 - [libevent](http://libevent.org/) use by [memcached](http://memcached.org/).
 
