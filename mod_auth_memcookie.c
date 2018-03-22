@@ -45,7 +45,7 @@
 
 #include "mod_auth.h"
 
-#include "libmemcached-1.0/memcached.h"
+#include "hiredis.h"
 
 #define LOGTAG_PREFIX "Auth_memCookie: "
 #define VERSION "2.0.1"
@@ -182,9 +182,8 @@ static apr_table_t *Auth_memCookie_get_session(request_rec *r, strAuth_memCookie
     char *szMemcached_Configuration=conf->szAuth_memCookie_memCached_Configuration;
     apr_time_t tExpireTime=conf->tAuth_memCookie_MemcacheObjectExpiry;
 
-    memcached_st *memc=NULL;
+    redisContext *redis = NULL;
     uint32_t flags=0;
-    memcached_return_t rc;
 
     apr_table_t *pMySession=NULL;
     size_t nGetKeyLen=strlen(szCookieValue);
@@ -205,48 +204,47 @@ static apr_table_t *Auth_memCookie_get_session(request_rec *r, strAuth_memCookie
     }
     ap_log_rerror(APLOG_MARK,APLOG_DEBUG|APLOG_NOERRNO, 0,r,LOGTAG_PREFIX  "libmemcached configuration are %s",conf->szAuth_memCookie_memCached_Configuration);
 
-    /* init memcache lib */
-    unless(memc=memcached(szMemcached_Configuration,strlen(szMemcached_Configuration))) {
-	 ap_log_rerror(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r, LOGTAG_PREFIX "memcache lib init failed");
-	 return NULL;
-    }
-
     unless(pMySession=apr_table_make(r->pool,conf->nAuth_memCookie_SessionTableSize)) {
        ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, LOGTAG_PREFIX "apr_tablemake failed");
        return NULL;
     }
 
-    /* get value for the key 'szCookieValue' in memcached server */
-    unless(szValue=(char*)memcached_get(memc,szCookieValue,nGetKeyLen,&nGetLen,&flags,&rc)) {
-       memcached_free(memc);
-       ap_log_rerror(APLOG_MARK,APLOG_DEBUG|APLOG_NOERRNO, 0,r,LOGTAG_PREFIX  "memcached_get failed to found key '%s'",szCookieValue);
+    /* init memcache lib */
+    redis=redisConnect("localhost", 6379);
+    unless((redis=redisConnect("localhost", 6379)) && (!redis->err)) {
+	 ap_log_rerror(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r, LOGTAG_PREFIX "hiredis lib init failed %s", redis->err);
+	 return NULL;
+    }
+
+    redisReply *reply = redisCommand(redis, "HGETALL %s", szCookieValue);
+    if ( reply->type == REDIS_REPLY_ERROR ) {
+       ap_log_rerror(APLOG_MARK,APLOG_DEBUG|APLOG_NOERRNO, 0,r,LOGTAG_PREFIX  "redis key '%s' error reading: %s",szCookieValue, reply->str);
+       freeReplyObject(reply); redisFree(redis);
+       return NULL;
+    } else if ( reply->type != REDIS_REPLY_ARRAY ) {
+       ap_log_rerror(APLOG_MARK,APLOG_DEBUG|APLOG_NOERRNO, 0,r,LOGTAG_PREFIX  "redis key '%s' unexpected type: %s",szCookieValue, reply->type);
+       freeReplyObject(reply); redisFree(redis);
+       return NULL;
+    } else if ( reply -> elements == 0 ) {
+       ap_log_rerror(APLOG_MARK,APLOG_DEBUG|APLOG_NOERRNO, 0,r,LOGTAG_PREFIX  "redis key '%s' empty",szCookieValue);
+       freeReplyObject(reply); redisFree(redis);
        return NULL;
     }
 
-    /* dup szValue in pool */
-    szMyValue=apr_pstrdup(r->pool,szValue);
+    for (int i = 0; i < reply->elements; i = i + 2 ) {
+        szFieldName = apr_pstrdup(r->pool, reply->element[i]->str);
+        szFieldValue = apr_pstrdup(r->pool, reply->element[i + 1]->str);
+        /* add key and value in pMySession table */
+        apr_table_set(pMySession,szFieldName,szFieldValue);
+        ap_log_rerror(APLOG_MARK,APLOG_DEBUG|APLOG_NOERRNO, 0,r,LOGTAG_PREFIX "session information '%s'='%s'",szFieldName,szFieldValue);
 
-    /* split szValue into struct strAuthSession */
-    /* szValue is formated multi line (\r\n) with name=value on each line */
-    /* must containe UserName,Groups,RemoteIP fieldname */
-    szTokenPos=NULL;
-    for(szField=apr_strtok(szMyValue,"\r\n",&szTokenPos);szField;szField=apr_strtok(NULL,"\r\n",&szTokenPos)) {
-        szFieldTokenPos=NULL;
-        szFieldName=apr_strtok(szField,"=",&szFieldTokenPos);
-        szFieldValue=apr_strtok(NULL,"\r\n",&szFieldTokenPos);
-	if (szFieldName!=NULL&&szFieldValue!=NULL) {
-	  /* add key and value in pMySession table */
-	  apr_table_set(pMySession,szFieldName,szFieldValue);
-	  ap_log_rerror(APLOG_MARK,APLOG_DEBUG|APLOG_NOERRNO, 0,r,LOGTAG_PREFIX "session information '%s'='%s'",szFieldName,szFieldValue);
-
-	  /* count the number of element added to table to check table size not reached */
-	  nbInfo++;
-          if (nbInfo>conf->nAuth_memCookie_SessionTableSize) {
-	    ap_log_rerror(APLOG_MARK,APLOG_ERR|APLOG_NOERRNO, 0,r,LOGTAG_PREFIX "maximum session information reached!");
-	    return NULL;
-	  }
+        /* count the number of element added to table to check table size not reached */
+        nbInfo++;
+        if (nbInfo>conf->nAuth_memCookie_SessionTableSize) {
+            ap_log_rerror(APLOG_MARK,APLOG_ERR|APLOG_NOERRNO, 0,r,LOGTAG_PREFIX "maximum session information reached!");
+            break;
+        }
 	}
-    }
 
     if (!apr_table_get(pMySession,"UserName")) {
        ap_log_rerror(APLOG_MARK,APLOG_ERR|APLOG_NOERRNO, 0,r,LOGTAG_PREFIX "Username not found in Session value(key:%s) found = %s",szCookieValue,szValue);
@@ -264,17 +262,13 @@ static apr_table_t *Auth_memCookie_get_session(request_rec *r, strAuth_memCookie
 
     /* reset expire time in memcached */
     if (conf->nAuth_memCookie_MemcacheObjectExpiryReset&&pMySession) {
-     if ((rc=memcached_set(memc,szCookieValue,nGetKeyLen,szValue,nGetLen,tExpireTime,flags))) {
-       ap_log_rerror(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r,LOGTAG_PREFIX  "Expire time with memcached_set (key:%s) failed with errcode=%s",szCookieValue,memcached_last_error_message(memc));
-       pMySession=NULL;
-     }
+//if ((rc=memcached_set(memc,szCookieValue,nGetKeyLen,szValue,nGetLen,tExpireTime,flags))) {
+//       ap_log_rerror(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r,LOGTAG_PREFIX  "Expire time with memcached_set (key:%s) failed with errcode=%s",szCookieValue,memcached_last_error_message(memc));
+//      pMySession=NULL;
+//     }
     }
 
-    /* free memcached_get retruned valued */
-    if (!szValue) free(szValue);
-
-    /* free the libmemcached session */
-    memcached_free(memc);
+    freeReplyObject(reply); redisFree(redis);
     
     /* set the good username found in request structure */
     if (pMySession!=NULL&&apr_table_get(pMySession,"UserName")!=NULL) r->user=(char*)apr_table_get(pMySession,"UserName");
